@@ -9,13 +9,11 @@ import chalk from 'chalk';
 import Github from 'github-api';
 import gitConfig from 'git-config';
 import {spawnSync} from 'child_process';
-import getOwerRepo from './getOwerRepo';
 
 const [command] = process.argv.slice(2);
 const option = minimist(process.argv.slice(3));
-const gitconfig = gitConfig.sync();
 const {host, ower, repo} = getOwerRepo();
-const accessToken = host === 'github.com' ? gitconfig.gic.token : gitconfig.gic[host].token;
+const accessToken = getAccessToken(host);
 
 new Github({
   token: accessToken,
@@ -28,7 +26,7 @@ new Github({
       console.error(err);
     }
     else {
-      console.log(chalk.yellow(`${ower}/${repo} have ${list.length} issues`));
+      console.log(chalk.yellow(`${ower}/${repo} has ${list.length} issues`));
 
       list.forEach(issue => {
         let {number, title, user, assignee, comments} = issue;
@@ -40,3 +38,40 @@ new Github({
       });
     }
   });
+
+function getOwerRepo () {
+  let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
+  let stdout = remoteInformation.stdout.toString().split('\n');
+
+  let {host, ower, repo} = stdout.map(line => line.trim())
+    .filter(line => /^Fetch URL/.test(line))
+    .map(line => {
+      let origin = line.replace(/^Fetch URL: /, '');
+      let {hostname, pathname} = url.parse(origin);
+      let [, ower, repo] = pathname.replace(/\.git$/, '').split('/');
+      return {host: hostname, ower, repo};
+    })
+    .pop() || {};
+
+  if (!host || !ower || !repo) {
+    console.error(chalk.red('Miss getting Github information(host, ower, repo).'));
+    console.error(chalk.red('Is not git repository here?.'));
+    process.exit(0);
+  }
+
+  return {host, ower, repo};
+}
+
+function getAccessToken (host) {
+  const config = gicConfig.sync()[`gic "${host}"`];
+
+  if (!config || !config.token) {
+    console.error(chalk.red('gic want your access token.'));
+    console.error(chalk.red('$ git config --global gic.github.com.token ${YOUR ACCESSTOKEN}'));
+    console.error(chalk.red('if you use Github Enterprise, set below.'));
+    console.error(chalk.red('$ git config --global gic.GITHUB.ENTERPRISE.HOST.token ${YOUR ACCESSTOKEN}'));
+    process.exit(0);
+  }
+
+  return config.token;
+}

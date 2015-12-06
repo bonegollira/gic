@@ -1,6 +1,6 @@
 {
   "name": "gic",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Github Issues Command line tool.",
   "main": "bin/index.js",
   "bin": {
@@ -12,6 +12,7 @@
     "babelify": "gulp babelify"
   },
   "files": [
+    "package.json",
     "bin",
     "LICENSE",
     "README.md"

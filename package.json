@@ -1,6 +1,6 @@
 {
   "name": "gic",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Github Issues Command line tool.",
   "main": "bin/index.js",
   "bin": {

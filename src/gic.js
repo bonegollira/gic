@@ -63,7 +63,7 @@ function getOwerRepo () {
 }
 
 function getAccessToken (host) {
-  const config = gicConfig.sync()[`gic "${host}"`];
+  const config = gitConfig.sync()[`gic "${host}"`];
 
   if (!config || !config.token) {
     console.error(chalk.red('gic want your access token.'));

@@ -29,9 +29,9 @@ new Github({
       console.log(chalk.yellow(`${ower}/${repo} has ${list.length} issues`));
 
       list.forEach(issue => {
-        let {number, title, user, assignee, comments} = issue;
+        let {number, title, user, assignee, comments, pull_request} = issue;
         console.log(
-          ' ',
+          pull_request ? '  [PR]' : '      ',
           chalk.green(`#${number}`),
           chalk.bold(title)
         );

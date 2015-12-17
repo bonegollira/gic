@@ -30,9 +30,12 @@ new Github({
 
       list.forEach(issue => {
         let {number, title, user, assignee, comments, pull_request} = issue;
+        let numberLabel = `#${number}`;
+        if (pull_request) {
+          numberLabel = `[${numberLabel}]`;
+        }
         console.log(
-          pull_request ? '  [PR]' : '      ',
-          chalk.green(`#${number}`),
+          chalk.green(`  ${numberLabel}`),
           chalk.bold(title)
         );
       });

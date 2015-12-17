@@ -18,6 +18,6 @@ gulp.task('babelify', function () {
     .pipe($.chmod(755))
     .pipe(gulp.dest('bin'))
     .on('end', function () {
-      console.log(spawnSync('gic').stdout.toString());
+      //console.log(spawnSync('gic').stdout.toString());
     });
 });

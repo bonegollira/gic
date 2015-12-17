@@ -32,6 +32,23 @@ else if (command === 'create') {
     });
   });
 }
+else if (command === 'show') {
+  let [number] = option._;
+
+  if (number) {
+    github.issues.getRepoIssue({user, repo, number}, (err, res) => {
+      if (err) {
+        console.error(err)
+      }
+      else {
+        showIssue(res);
+        github.issues.getComments({user, repo, number}, (err, res) => {
+          err ? console.error(err) : showComments(number, res);
+        });
+      }
+    });
+  }
+}
 
 function getUserRepo () {
   let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
@@ -111,4 +128,20 @@ function showIssues (issues) {
 
 function compareIssue (aIssue, bIssue) {
   return aIssue.number > bIssue.number;
+}
+
+function showIssue (issue) {
+  let {url, title, body} = issue;
+
+  console.log(chalk.yellow.bold(`\n# ${title}`));
+  console.log(`${body}\n`);
+}
+
+function showComments (number, comments) {
+  comments.forEach(comment => {
+    let {body, user} = comment;
+
+    console.log(chalk.blue(`> @${user.login}`));
+    console.log(`${body}`);
+  });
 }

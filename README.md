@@ -30,8 +30,18 @@ $ git config --global gic.enterprise.github.com.token [ACCESS TOKEN]
 ```
 
 ```sh
-$ gic
+$ gic [command = list]
 ```
+
+# Command
+
+### list
+
+Show all issues on repository.
+
+### create
+
+Create issue on repository, launch editor for write message.
 
 # ScreenShot
 

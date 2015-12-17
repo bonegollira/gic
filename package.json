@@ -1,7 +1,7 @@
 {
   "name": "gic",
   "description": "Github Issues Command line tool.",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "author": "bonegollira",
   "bin": {
     "gic": "./bin/gic.js"

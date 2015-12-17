@@ -31,7 +31,7 @@ new Github({
       list.forEach(issue => {
         let {number, title, user, assignee, comments, pull_request} = issue;
         console.log(
-          pull_request ? '  [PR]' : '      ',
+          pull_request ? '  PR' : '    ',
           chalk.green(`#${number}`),
           chalk.bold(title)
         );

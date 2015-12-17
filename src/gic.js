@@ -7,7 +7,6 @@ import minimist from 'minimist';
 import request from 'request';
 import chalk from 'chalk';
 import Github from 'github-api';
-import gitConfig from 'git-config';
 import {spawnSync} from 'child_process';
 
 const [command] = process.argv.slice(2);
@@ -53,10 +52,10 @@ function getOwerRepo () {
   return {host, ower, repo};
 }
 
-function getAccessToken (host) {
-  const config = gitConfig.sync()[`gic "${host}"`];
+function getAccessToken (host = 'github.com') {
+  const token = spawnSync('git', ['config', '--get', `gic.${host}.token`]).stdout.toString();
 
-  if (!config || !config.token) {
+  if (!token || !token.length) {
     console.error(chalk.red('gic want your access token.'));
     console.error(chalk.red('$ git config --global gic.github.com.token ${YOUR ACCESSTOKEN}'));
     console.error(chalk.red('if you use Github Enterprise, set below.'));
@@ -64,7 +63,7 @@ function getAccessToken (host) {
     process.exit(0);
   }
 
-  return config.token;
+  return token;
 }
 
 function showIssues (issues) {

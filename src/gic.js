@@ -15,7 +15,6 @@ const {host, user, repo} = getUserRepo();
 const token = getAccessToken(host);
 const githubOption = getGithubOption(host);
 const github = new Github(githubOption);
-console.log(token);
 github.authenticate({token, type: 'token'});
 
 github.issues.repoIssues({user, repo}, (err, res) => {

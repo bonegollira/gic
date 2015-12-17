@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "chalk": "^1.1.1",
-    "github-api": "^0.10.7",
+    "github": "^0.2.4",
     "minimist": "^1.2.0",
     "request": "^2.67.0"
   },

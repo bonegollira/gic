@@ -7,9 +7,12 @@ import minimist from 'minimist';
 import request from 'request';
 import chalk from 'chalk';
 import Github from 'github';
+import editor from 'editor';
+import fs from 'fs';
+import randomstring from 'randomstring';
 import {spawnSync} from 'child_process';
 
-const [command] = process.argv.slice(2);
+const [command = 'list'] = process.argv.slice(2);
 const option = minimist(process.argv.slice(3));
 const {host, user, repo} = getUserRepo();
 const token = getAccessToken(host);
@@ -17,14 +20,18 @@ const githubOption = getGithubOption(host);
 const github = new Github(githubOption);
 github.authenticate({token, type: 'token'});
 
-github.issues.repoIssues({user, repo}, (err, res) => {
-  if (err) {
-    console.error(err);
-  }
-  else {
-    showIssues(res);
-  }
-});
+if (command === 'list') {
+  github.issues.repoIssues({user, repo}, (err, res) => {
+    err ? console.error(err) : showIssues(res);
+  });
+}
+else if (command === 'create') {
+  getIssueMeesage((title, body) => {
+    github.issues.create({user, repo, title, body}, (err, res) => {
+      err ? console.error(err) : console.log(res.url);
+    });
+  });
+}
 
 function getUserRepo () {
   let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
@@ -74,6 +81,16 @@ function getGithubOption (host) {
     return {host, pathPrefix: '/api/v3', ...githubOption};
   }
   return githubOption;
+}
+
+function getIssueMeesage (callback) {
+  let filename = `.${randomstring.generate()}.gic`;
+  editor(filename, (code, sig) => {
+    let message = fs.readFileSync(filename, 'utf-8');
+    let [title = '', ...body] = message.split('\n');
+    fs.unlinkSync(filename);
+    callback(title, body.join('\n').trim());
+  });
 }
 
 function showIssues (issues) {

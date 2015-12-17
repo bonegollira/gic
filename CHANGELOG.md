@@ -1,3 +1,7 @@
+## 0.2.0
+
+- [#29](https://github.com/bonegollira/gic/pull/29) add show command.
+
 ## 0.1.0
 
 - [#24](https://github.com/bonegollira/gic/pull/24) add create command.

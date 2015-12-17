@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import Github from 'github';
 import editor from 'editor';
 import fs from 'fs';
+import randomstring from 'randomstring';
 import {spawnSync} from 'child_process';
 
 const [command = 'list'] = process.argv.slice(2);
@@ -83,10 +84,11 @@ function getGithubOption (host) {
 }
 
 function getIssueMeesage (callback) {
-  editor('create.gic', (code, sig) => {
-    let message = fs.readFileSync('create.gic', 'utf-8');
+  let filename = `.${randomstring.generate()}.gic`;
+  editor(filename, (code, sig) => {
+    let message = fs.readFileSync(filename, 'utf-8');
     let [title = '', ...body] = message.split('\n');
-    fs.unlinkSync('create.gic');
+    fs.unlinkSync(filename);
     callback(title, body.join('\n').trim());
   });
 }

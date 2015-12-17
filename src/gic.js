@@ -26,19 +26,7 @@ new Github({
       console.error(err);
     }
     else {
-      console.log(chalk.yellow(`${ower}/${repo} has ${list.length} issues`));
-
-      list.forEach(issue => {
-        let {number, title, user, assignee, comments, pull_request} = issue;
-        let numberLabel = `#${number}`;
-        if (pull_request) {
-          numberLabel = `[${numberLabel}]`;
-        }
-        console.log(
-          chalk.green(`  ${numberLabel}`),
-          chalk.bold(title)
-        );
-      });
+      showIssues(list);
     }
   });
 
@@ -77,4 +65,24 @@ function getAccessToken (host) {
   }
 
   return config.token;
+}
+
+function showIssues (issues) {
+  console.log(chalk.yellow(`${ower}/${repo} has ${issues.length} issues`));
+
+  issues.sort(compareIssue).forEach(issue => {
+    let {number, title, user, assignee, comments, pull_request} = issue;
+    let numberLabel = `#${number}`;
+    if (pull_request) {
+      numberLabel = `[${numberLabel}]`;
+    }
+    console.log(
+      chalk.green(`  ${numberLabel}`),
+      chalk.bold(title)
+    );
+  });
+}
+
+function compareIssue (aIssue, bIssue) {
+  return aIssue.number > bIssue.number;
 }

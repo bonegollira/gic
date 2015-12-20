@@ -1,3 +1,6 @@
+- [#38](https://github.com/bonegollira/gic/pull/38) fixed sort bug.
+- [#37](https://github.com/bonegollira/gic/pull/37) use [log-update](https://www.npmjs.com/package/log-update).
+
 ## 0.2.0
 
 - [#29](https://github.com/bonegollira/gic/pull/29) add show command.

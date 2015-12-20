@@ -1,3 +1,6 @@
+- [#40](https://github.com/bonegollira/gic/pull/40) add eslint.
+- [#40](https://github.com/bonegollira/gic/pull/40) reject gulp.
+- [#40](https://github.com/bonegollira/gic/pull/40) stop updating status log.
 - [#39](https://github.com/bonegollira/gic/pull/39) change screenshot in README.md.
 - [#38](https://github.com/bonegollira/gic/pull/38) fixed sort bug.
 - [#37](https://github.com/bonegollira/gic/pull/37) use [log-update](https://www.npmjs.com/package/log-update).

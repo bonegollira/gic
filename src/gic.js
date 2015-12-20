@@ -85,26 +85,31 @@ function clearStatus () {
 
 function getUserRepo () {
   setStatusMessage('getting user/repo');
-  let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
-  let stdout = remoteInformation.stdout.toString().split('\n');
+  let origin = getOriginUrl();
 
-  let {host, user, repo} = stdout.map(line => line.trim())
-    .filter(line => /^Fetch URL/.test(line))
-    .map(line => {
-      let origin = line.replace(/^Fetch URL: /, '');
-      let {hostname, pathname} = url.parse(origin);
-      let [, user, repo] = pathname.replace(/\.git$/, '').split('/');
-      return {host: hostname, user, repo};
-    })
-    .pop() || {};
+  let {hostname, pathname} = url.parse(origin);
+  let [, user, repo] = pathname.replace(/\.git$/, '').split('/');
 
-  if (!host || !user || !repo) {
+  if (!hostname || !user || !repo) {
     console.error(chalk.red('Miss getting Github information(host, user, repo).'));
     console.error(chalk.red('Is not git repository here?.'));
     process.exit(0);
   }
 
-  return {host, user, repo};
+  return {host: hostname, user, repo};
+}
+
+function getOriginUrl () {
+  let localInformation = spawnSync('git', ['config', '--get', 'remote.origin.url']);
+  if (localInformation.stdout.toString()) {
+    return localInformation.stdout.toString();
+  }
+
+  let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
+  return remoteInformation.stdout.toString().split('\n')
+    .filter(line => /^Fetch URL/.test(line))
+    .map(line => line.trim().replace(/^Fetch URL: /, ''))
+    .pop();
 }
 
 function getAccessToken (host = 'github.com') {

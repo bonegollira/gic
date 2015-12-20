@@ -179,7 +179,13 @@ function showIssues (issues) {
 }
 
 function compareIssue (aIssue, bIssue) {
-  return aIssue.number > bIssue.number;
+  if (aIssue.number > bIssue.number) {
+    return 1;
+  }
+  if (aIssue.number < bIssue.number) {
+    return -1;
+  }
+  return 0;
 }
 
 function showIssue (issue) {

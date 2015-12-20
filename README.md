@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/gic.svg)](https://badge.fury.io/js/gic)
+
 # gic
 GitHub Issues Command line tool.
 

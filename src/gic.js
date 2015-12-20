@@ -37,7 +37,6 @@ if (command === 'list') {
 else if (command === 'create') {
   getIssueMeesage((title, body) => {
     github.issues.create({user, repo, title, body}, (err, res) => {
-      clearStatus();
       if (err) {
         setErrorMessage(err);
         return;

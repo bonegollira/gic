@@ -4,7 +4,6 @@
 
 import url from 'url';
 import minimist from 'minimist';
-import request from 'request';
 import chalk from 'chalk';
 import Github from 'github';
 import editor from 'editor';
@@ -13,8 +12,6 @@ import logUpdate from 'log-update';
 import randomstring from 'randomstring';
 import {spawnSync} from 'child_process';
 
-let timer;
-const progress = ['.', '..', '...', '....', '.....'];
 const [command = 'list'] = process.argv.slice(2);
 const option = minimist(process.argv.slice(3));
 const {host, user, repo} = getUserRepo();
@@ -70,38 +67,24 @@ else if (command === 'show') {
   }
 }
 
-function setStatusMessage (msg, isProgress = true) {
-  if (timer !== undefined) {
-    clearInterval(timer);
-    timer = undefined;
-  }
-
-  if (isProgress) {
-    let i = 0;
-    timer = setInterval(() => {
-      let frame = i++ % progress.length;
-      logUpdate(`[${chalk.green('gic')}]`, msg, progress[frame]);
-    }, 200);
-  }
-  else {
-    logUpdate(`[${chalk.green('gic')}]`, msg);
-  }
+function setStatusMessage (msg) {
+  logUpdate(`[${chalk.green('gic')}]`, msg);
 }
 
 function setErrorMessage (msg) {
-  setStatusMessage('error', false);
+  setStatusMessage('error');
   logUpdate.stderr(`[${chalk.red('gic')}]`, msg);
   logUpdate.stderr.done();
 }
 
 function clearStatus () {
-  setStatusMessage('done', false);
+  setStatusMessage('done');
   logUpdate.clear();
   logUpdate.done();
 }
 
 function getUserRepo () {
-  setStatusMessage('getting user/repo.');
+  setStatusMessage('getting user/repo');
   let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
   let stdout = remoteInformation.stdout.toString().split('\n');
 
@@ -125,7 +108,7 @@ function getUserRepo () {
 }
 
 function getAccessToken (host = 'github.com') {
-  setStatusMessage('...getting access token.');
+  setStatusMessage('getting access token');
   const token = spawnSync('git', ['config', '--get', `gic.${host}.token`]).stdout.toString();
 
   if (!token || !token.length) {
@@ -154,7 +137,7 @@ function getGithubOption (host) {
 
 function getIssueMeesage (callback) {
   let filename = `.${randomstring.generate()}.gic`;
-  editor(filename, (code, sig) => {
+  editor(filename, () => {
     let message = fs.readFileSync(filename, 'utf-8');
     let [title = '', ...body] = message.split('\n');
     fs.unlinkSync(filename);
@@ -166,7 +149,7 @@ function showIssues (issues) {
   console.log(chalk.yellow(`${user}/${repo} has ${issues.length} issues`));
 
   issues.sort(compareIssue).forEach(issue => {
-    let {number, title, user, assignee, comments, pull_request} = issue;
+    let {number, title/*, user, assignee, comments*/, pull_request} = issue;
     let numberLabel = `#${number}`;
     if (pull_request) {
       numberLabel = `[${numberLabel}]`;
@@ -189,7 +172,7 @@ function compareIssue (aIssue, bIssue) {
 }
 
 function showIssue (issue) {
-  let {url, title, body} = issue;
+  let {/*url, */title, body} = issue;
 
   console.log(chalk.yellow.bold(`\n# ${title}`));
   console.log(`${body}\n`);

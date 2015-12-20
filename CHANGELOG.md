@@ -1,3 +1,9 @@
+## 0.4.0
+
+- [#50](https://github.com/bonegollira/gic/pull/50) add close command.
+- [#50](https://github.com/bonegollira/gic/pull/50) allow dont save message file after edit file.
+- [#49](https://github.com/bonegollira/gic/pull/40) add comment command.
+
 ### 0.3.1
 
 - [#48](https://github.com/bonegollira/gic/pull/48) bugfix. comment indent.

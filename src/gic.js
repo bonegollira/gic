@@ -85,6 +85,36 @@ else if (command === 'comment') {
     });
   }, true);
 }
+else if (command === 'close') {
+  let [number] = option._;
+  const closeIssue = () => {
+    github.issues.edit({user, repo, number, state: 'closed'}, (err, res) => {
+      if (err) {
+        setErrorMessage(err);
+        return;
+      }
+      clearStatus();
+      console.log(res.url);
+    });
+  };
+
+  if (!number) {
+    setErrorMessage('$ gic close [issue_number]');
+    process.exit(0);
+  }
+
+  getIssueMeesage(body => {
+    body ? github.issues.createComment({user, repo, number, body}, (err, res) => {
+      if (err) {
+        setErrorMessage(err);
+        return;
+      }
+      clearStatus();
+      console.log(res.url);
+      closeIssue();
+    }) : closeIssue();
+  }, true);
+}
 
 function setStatusMessage (msg) {
   logUpdate(`[${chalk.green('gic')}]`, msg);
@@ -162,11 +192,16 @@ function getGithubOption (host) {
 function getIssueMeesage (callback, isBody) {
   let filename = `.${randomstring.generate()}.gic`;
   editor(filename, () => {
-    let message = fs.readFileSync(filename, 'utf-8');
-    let [title = '', ...bodyLine] = message.split('\n');
-    let body = isBody ? message.trim() : bodyLine.join('\n').trim();
-    fs.unlinkSync(filename);
-    callback(body, title);
+    if (fs.existsSync(filename)) {
+      let message = fs.readFileSync(filename, 'utf-8');
+      let [title = '', ...bodyLine] = message.split('\n');
+      let body = isBody ? message.trim() : bodyLine.join('\n').trim();
+      fs.unlinkSync(filename);
+      callback(body, title);
+    }
+    else {
+      callback();
+    }
   });
 }
 

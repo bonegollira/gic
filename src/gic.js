@@ -188,6 +188,6 @@ function showComments (number, comments) {
     let {body, user} = comment;
 
     console.log(' ', chalk.blue(`> @${user.login}`));
-    console.log(' ', `${body}`);
+    console.log(' ', `${body.replace(/\n/g, '\n  ')}`);
   });
 }

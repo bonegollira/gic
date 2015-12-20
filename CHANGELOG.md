@@ -1,3 +1,5 @@
+### 0.3.1
+
 - [#48](https://github.com/bonegollira/gic/pull/48) bugfix. comment indent.
 
 ## 0.3.0

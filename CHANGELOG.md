@@ -1,3 +1,5 @@
+## 0.3.0
+
 - [#40](https://github.com/bonegollira/gic/pull/40) add eslint.
 - [#40](https://github.com/bonegollira/gic/pull/40) reject gulp.
 - [#40](https://github.com/bonegollira/gic/pull/40) stop updating status log.

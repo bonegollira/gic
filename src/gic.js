@@ -32,7 +32,7 @@ if (command === 'list') {
   });
 }
 else if (command === 'create') {
-  getIssueMeesage((title, body) => {
+  getIssueMeesage((body, title) => {
     github.issues.create({user, repo, title, body}, (err, res) => {
       if (err) {
         setErrorMessage(err);
@@ -65,6 +65,25 @@ else if (command === 'show') {
       });
     });
   }
+}
+else if (command === 'comment') {
+  let [number] = option._;
+
+  if (!number) {
+    setErrorMessage('$ gic comment [issue_number]');
+    process.exit(0);
+  }
+
+  getIssueMeesage(body => {
+    github.issues.createComment({user, repo, number, body}, (err, res) => {
+      if (err) {
+        setErrorMessage(err);
+        return;
+      }
+      clearStatus();
+      console.log(res.url);
+    });
+  }, true);
 }
 
 function setStatusMessage (msg) {
@@ -140,13 +159,14 @@ function getGithubOption (host) {
   return githubOption;
 }
 
-function getIssueMeesage (callback) {
+function getIssueMeesage (callback, isBody) {
   let filename = `.${randomstring.generate()}.gic`;
   editor(filename, () => {
     let message = fs.readFileSync(filename, 'utf-8');
-    let [title = '', ...body] = message.split('\n');
+    let [title = '', ...bodyLine] = message.split('\n');
+    let body = isBody ? message.trim() : bodyLine.join('\n').trim();
     fs.unlinkSync(filename);
-    callback(title, body.join('\n').trim());
+    callback(body, title);
   });
 }
 

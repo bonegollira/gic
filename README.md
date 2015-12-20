@@ -55,13 +55,21 @@ Create issue on repository, launch editor for write message.
 
 ### show [number]
 
-Need user scope.
+Need [user](https://developer.github.com/v3/oauth/#scopes) scope.
 
 ```
 $ gic show 1
 ```
 
 Show comments for issues.
+
+### comment [number]
+
+Add new comment.
+
+```
+$ gic comment 1
+```
 
 # Use with peco.
 

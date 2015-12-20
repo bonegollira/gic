@@ -53,7 +53,7 @@ $ gic create
 
 Create issue on repository, launch editor for write message.
 
-### show [number]
+### show [issue_number]
 
 Need [user](https://developer.github.com/v3/oauth/#scopes) scope.
 
@@ -63,13 +63,22 @@ $ gic show 1
 
 Show comments for issues.
 
-### comment [number]
+### comment [issue_number]
 
 Add new comment.
 
 ```
 $ gic comment 1
 ```
+
+### close [issue_number]
+
+Close issue.
+
+```
+$ gic close 1
+```
+
 
 # Use with peco.
 

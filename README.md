@@ -63,6 +63,21 @@ $ gic show 1
 
 Show comments for issues.
 
+# Use with peco.
+
+```
+function peco-gic () {
+  local selected_issue_number=$(gic list | peco | sed -e 's/^  #\([0-9]*\).*$/\1/g')
+  if [ -n "$selected_issue_number" ]; then
+    BUFFER="gic show ${selected_issue_number}"
+    zle accept-line
+  fi
+  zle clear-screen
+}
+zle -N peco-gic
+bindkey "^N" peco-gic
+```
+
 # ScreenShot
 
 ![ScreenShot](images/screenshot.png)

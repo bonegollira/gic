@@ -1,3 +1,4 @@
+- [#39](https://github.com/bonegollira/gic/pull/39) change screenshot in README.md.
 - [#38](https://github.com/bonegollira/gic/pull/38) fixed sort bug.
 - [#37](https://github.com/bonegollira/gic/pull/37) use [log-update](https://www.npmjs.com/package/log-update).
 

@@ -1,3 +1,5 @@
+- [#48](https://github.com/bonegollira/gic/pull/48) bugfix. comment indent.
+
 ## 0.3.0
 
 - [#40](https://github.com/bonegollira/gic/pull/40) add eslint.

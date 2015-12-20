@@ -9,9 +9,12 @@ import chalk from 'chalk';
 import Github from 'github';
 import editor from 'editor';
 import fs from 'fs';
+import logUpdate from 'log-update';
 import randomstring from 'randomstring';
 import {spawnSync} from 'child_process';
 
+let timer;
+const progress = ['.', '..', '...', '....', '.....'];
 const [command = 'list'] = process.argv.slice(2);
 const option = minimist(process.argv.slice(3));
 const {host, user, repo} = getUserRepo();
@@ -21,14 +24,25 @@ const github = new Github(githubOption);
 github.authenticate({token, type: 'token'});
 
 if (command === 'list') {
-  github.issues.repoIssues({user, repo}, (err, res) => {
-    err ? console.error(err) : showIssues(res);
+  setStatusMessage('requesting issues');
+  github.issues.repoIssues({user, repo}, (err, issues) => {
+    if (err) {
+      setErrorMessage(err);
+      return;
+    }
+    clearStatus();
+    showIssues(issues);
   });
 }
 else if (command === 'create') {
   getIssueMeesage((title, body) => {
     github.issues.create({user, repo, title, body}, (err, res) => {
-      err ? console.error(err) : console.log(res.url);
+      if (err) {
+        setErrorMessage(err);
+        return;
+      }
+      clearStatus();
+      console.log(res.url);
     });
   });
 }
@@ -36,21 +50,58 @@ else if (command === 'show') {
   let [number] = option._;
 
   if (number) {
-    github.issues.getRepoIssue({user, repo, number}, (err, res) => {
+    setStatusMessage(`requesting #${number} issue and comment`);
+    github.issues.getRepoIssue({user, repo, number}, (err, issue) => {
       if (err) {
-        console.error(err)
+        setErrorMessage(err);
+        return;
       }
-      else {
-        showIssue(res);
-        github.issues.getComments({user, repo, number}, (err, res) => {
-          err ? console.error(err) : showComments(number, res);
-        });
-      }
+
+      github.issues.getComments({user, repo, number}, (err, comments) => {
+        if (err) {
+          setErrorMessage(err);
+          return;
+        }
+        clearStatus();
+        showIssue(issue);
+        showComments(number, comments);
+      });
     });
   }
 }
 
+function setStatusMessage (msg, isProgress = true) {
+  if (timer !== undefined) {
+    clearInterval(timer);
+    timer = undefined;
+  }
+
+  if (isProgress) {
+    let i = 0;
+    timer = setInterval(() => {
+      let frame = i++ % progress.length;
+      logUpdate(`[${chalk.green('gic')}]`, msg, progress[frame]);
+    }, 200);
+  }
+  else {
+    logUpdate(`[${chalk.green('gic')}]`, msg);
+  }
+}
+
+function setErrorMessage (msg) {
+  setStatusMessage('error', false);
+  logUpdate.stderr(`[${chalk.red('gic')}]`, msg);
+  logUpdate.stderr.done();
+}
+
+function clearStatus () {
+  setStatusMessage('done', false);
+  logUpdate.clear();
+  logUpdate.done();
+}
+
 function getUserRepo () {
+  setStatusMessage('getting user/repo.');
   let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
   let stdout = remoteInformation.stdout.toString().split('\n');
 
@@ -74,6 +125,7 @@ function getUserRepo () {
 }
 
 function getAccessToken (host = 'github.com') {
+  setStatusMessage('...getting access token.');
   const token = spawnSync('git', ['config', '--get', `gic.${host}.token`]).stdout.toString();
 
   if (!token || !token.length) {
@@ -141,7 +193,7 @@ function showComments (number, comments) {
   comments.forEach(comment => {
     let {body, user} = comment;
 
-    console.log(chalk.blue(`> @${user.login}`));
-    console.log(`${body}`);
+    console.log(' ', chalk.blue(`> @${user.login}`));
+    console.log(' ', `${body}`);
   });
 }

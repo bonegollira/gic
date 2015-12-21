@@ -229,10 +229,13 @@ function compareIssue (aIssue, bIssue) {
 }
 
 function showIssue (issue) {
-  let {/*url, */title, body} = issue;
+  let {title, body, labels, milestone, assignee} = issue;
 
-  console.log(chalk.yellow.bold(`\n# ${title}`));
-  console.log(`${body}\n`);
+  labels.length && console.log(chalk.underline(`labels: ${labels.map(label => label.name).join(', ')}`));
+  milestone && console.log(chalk.underline(`milestone: ${milestone.title}`));
+  assignee && console.log(chalk.underline(`assignee: @${assignee.login}`));
+  console.log(chalk.yellow.bold(`# ${title}`));
+  console.log(`${body}`);
 }
 
 function showComments (number, comments) {

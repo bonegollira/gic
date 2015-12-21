@@ -79,6 +79,12 @@ Close issue.
 $ gic close 1
 ```
 
+# Option
+
+```
+  --noprogress dont display progress log.
+```
+
 
 # Use with peco.
 

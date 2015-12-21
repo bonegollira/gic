@@ -24,148 +24,133 @@ const github = new Github(githubOption);
 github.authenticate({token, type: 'token'});
 
 if (command === 'list') {
-  setStatusMessage('requesting issues');
-  github.issues.repoIssues({user, repo}, (err, issues) => {
-    if (err) {
-      setErrorMessage(err);
-      return;
-    }
-    clearStatus();
-    showIssues(issues);
-  });
+  status('requesting issues');
+  repoIssuesPromise()
+    .then(issues => {
+      clearStatus();
+      showIssues(issues);
+    })
+    .catch(error);
 }
 else if (command === 'create') {
-  getIssueMeesage((body, title) => {
-    github.issues.create({user, repo, title, body}, (err, res) => {
-      if (err) {
-        setErrorMessage(err);
-        return;
-      }
+  getIssueMessagePromise()
+    .then(({title, body}) => createPromise(title, body))
+    .then(res => {
       clearStatus();
       console.log(res.url);
-    });
-  });
+    })
+    .catch(error);
 }
-else if (command === 'show') {
+else {
   let [, number] = argv._;
 
-  if (number) {
-    setStatusMessage(`requesting #${number} issue and comment`);
-    github.issues.getRepoIssue({user, repo, number}, (err, issue) => {
-      if (err) {
-        setErrorMessage(err);
-        return;
-      }
+  typeof number !== 'number' && error('$ gic show/comment/close [issue_number]');
 
-      github.issues.getComments({user, repo, number}, (err, comments) => {
-        if (err) {
-          setErrorMessage(err);
-          return;
-        }
+  if (command === 'show') {
+    status(`requesting #${number} issue and comment`);
+    Promise.all([getRepoIssuePromise(number), getCommentsPromise(number)])
+      .then(([issue, comments]) => {
         clearStatus();
         showIssue(issue);
         showComments(number, comments);
-      });
+      })
+      .catch(error);
+  }
+  else if (command === 'comment') {
+    getIssueMessagePromise(true)
+      .then(({body}) => createCommentPromise(number, body))
+      .then(res => {
+        clearStatus();
+        console.log(res.url);
+      })
+      .catch(error);
+  }
+  else if (command === 'close') {
+    getIssueMessagePromise(true)
+      .then(({body}) => body ? createCommentPromise(number, body) : true)
+      .then(() => closePromise(number))
+      .then(res => {
+        clearStatus();
+        console.log(res.url);
+      })
+      .catch(error);
+  }
+}
+
+function repoIssuesPromise () {
+  return createGithubIssuesPromise('repoIssues');
+}
+
+function createPromise (title, body) {
+  return createGithubIssuesPromise('create', {title, body});
+}
+
+function getRepoIssuePromise (number) {
+  return createGithubIssuesPromise('getRepoIssue', {number});
+}
+
+function getCommentsPromise (number) {
+  return createGithubIssuesPromise('getComments', {number});
+}
+
+function createCommentPromise (number, body) {
+  return createGithubIssuesPromise('createComment', {number, body});
+}
+
+function closePromise (number) {
+  return createGithubIssuesPromise('edit', {number, state: 'closed'});
+}
+
+function createGithubIssuesPromise (api, option = {}) {
+  return new Promise((resolve, reject) => {
+    github.issues[api]({user, repo, ...option}, (err, res) => {
+      err ? reject(err) : resolve(res);
     });
-  }
-}
-else if (command === 'comment') {
-  let [, number] = argv._;
-
-  if (!number) {
-    setErrorMessage('$ gic comment [issue_number]');
-    process.exit(0);
-  }
-
-  getIssueMeesage(body => {
-    github.issues.createComment({user, repo, number, body}, (err, res) => {
-      if (err) {
-        setErrorMessage(err);
-        return;
-      }
-      clearStatus();
-      console.log(res.url);
-    });
-  }, true);
-}
-else if (command === 'close') {
-  let [, number] = argv._;
-  const closeIssue = () => {
-    github.issues.edit({user, repo, number, state: 'closed'}, (err, res) => {
-      if (err) {
-        setErrorMessage(err);
-        return;
-      }
-      clearStatus();
-      console.log(res.url);
-    });
-  };
-
-  if (!number) {
-    setErrorMessage('$ gic close [issue_number]');
-    process.exit(0);
-  }
-
-  getIssueMeesage(body => {
-    body ? github.issues.createComment({user, repo, number, body}, (err, res) => {
-      if (err) {
-        setErrorMessage(err);
-        return;
-      }
-      clearStatus();
-      console.log(res.url);
-      closeIssue();
-    }) : closeIssue();
-  }, true);
+  });
 }
 
-function setStatusMessage (msg) {
-  if (noprogress) {
-    return;
-  }
-  logUpdate(`[${chalk.green('gic')}]`, msg);
-}
-
-function setErrorMessage (msg) {
-  if (noprogress) {
-    return;
-  }
-  clearStatus();
-  logUpdate.stderr(`[${chalk.red('gic')}]`, msg);
-  logUpdate.stderr.done();
+function status (message) {
+  !noprogress && logUpdate(`[${chalk.green('gic')}]`, message);
 }
 
 function clearStatus () {
-  if (noprogress) {
-    return;
-  }
-  setStatusMessage('done');
   logUpdate.clear();
   logUpdate.done();
 }
 
-function getUserRepo () {
-  setStatusMessage('getting user/repo');
-  let origin = getOriginUrl();
+function error (...messages) {
+  clearStatus();
+  messages.forEach(message => {
+    console.error(chalk.red(message));
+  });
+  process.exit(0);
+}
 
+function getUserRepo () {
+  status('getting user/repo');
+  let origin = getOriginUrl();
   let {hostname, pathname} = url.parse(origin);
   let [, user, repo] = pathname.replace(/\.git$/, '').split('/');
 
-  if (!hostname || !user || !repo) {
-    console.error(chalk.red('Miss getting Github information(host, user, repo).'));
-    console.error(chalk.red('Is not git repository here?.'));
-    process.exit(0);
-  }
+  (!hostname || !user || !repo) && error(
+    'Miss getting Github information(host, user, repo).',
+    'Is not git repository here?.'
+  );
 
   return {host: hostname, user, repo};
 }
 
 function getOriginUrl () {
-  let localInformation = spawnSync('git', ['config', '--get', 'remote.origin.url']);
-  if (localInformation.stdout.toString()) {
-    return localInformation.stdout.toString();
-  }
+  return getLocalOriginUrl() || getRemoteOriginUrl();
+}
 
+// $ git config --get remote.origin.url
+function getLocalOriginUrl () {
+  return spawnSync('git', ['config', '--get', 'remote.origin.url']).stdout.toString();
+}
+
+// $ git remote show origin
+function getRemoteOriginUrl () {
   let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
   return remoteInformation.stdout.toString().split('\n')
     .filter(line => /^Fetch URL/.test(line))
@@ -173,17 +158,18 @@ function getOriginUrl () {
     .pop();
 }
 
+// $ git config --get gic.github.com.token
+// $ git config --get gic.github.enterprise.token
 function getAccessToken (host = 'github.com') {
-  setStatusMessage('getting access token');
+  status('getting access token');
   const token = spawnSync('git', ['config', '--get', `gic.${host}.token`]).stdout.toString();
 
-  if (!token || !token.length) {
-    console.error(chalk.red('gic want your access token.'));
-    console.error(chalk.red('$ git config --global gic.github.com.token ${YOUR ACCESSTOKEN}'));
-    console.error(chalk.red('if you use Github Enterprise, set below.'));
-    console.error(chalk.red('$ git config --global gic.GITHUB.ENTERPRISE.HOST.token ${YOUR ACCESSTOKEN}'));
-    process.exit(0);
-  }
+  (!token || !token.length) && error(
+    'gic want your access token.',
+    '$ git config --global gic.github.com.token ${YOUR ACCESSTOKEN}',
+    'if you use Github Enterprise, set below.',
+    '$ git config --global gic.GITHUB.ENTERPRISE.HOST.token ${YOUR ACCESSTOKEN}'
+  );
 
   return token;
 }
@@ -201,24 +187,23 @@ function getGithubOption (host) {
   return githubOption;
 }
 
-function getIssueMeesage (callback, isBody) {
+function getIssueMessagePromise (isBody) {
   let filename = `.${randomstring.generate()}.gic`;
-  editor(filename, () => {
-    if (fs.existsSync(filename)) {
+  fs.writeFileSync(filename, '', 'utf-8');
+
+  return new Promise(resolve => {
+    editor(filename, () => {
       let message = fs.readFileSync(filename, 'utf-8');
       let [title = '', ...bodyLine] = message.split('\n');
       let body = isBody ? message.trim() : bodyLine.join('\n').trim();
       fs.unlinkSync(filename);
-      callback(body, title);
-    }
-    else {
-      callback();
-    }
+      resolve({title, body});
+    });
   });
 }
 
 function showIssues (issues) {
-  !noprogress && console.log(chalk.yellow(`${user}/${repo} has ${issues.length} issues`));
+  console.log(chalk.yellow(`${user}/${repo} has ${issues.length} issues`));
 
   issues.sort(compareIssue).forEach(issue => {
     let {number, title/*, user, assignee, comments*/, pull_request} = issue;

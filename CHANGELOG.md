@@ -1,3 +1,4 @@
+- [#57](https://github.com/bonegollira/gic/pull/57) refactering.
 - [#55](https://github.com/bonegollira/gic/pull/55) add `--noprogress` option.
 
 ## 0.4.0

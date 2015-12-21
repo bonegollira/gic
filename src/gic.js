@@ -12,8 +12,11 @@ import logUpdate from 'log-update';
 import randomstring from 'randomstring';
 import {spawnSync} from 'child_process';
 
-const [command = 'list'] = process.argv.slice(2);
-const option = minimist(process.argv.slice(3));
+const argv = minimist(process.argv.slice(2), {
+  boolean: ['noprogress']
+});
+const [command = 'list'] = argv._;
+const {noprogress} = argv;
 const {host, user, repo} = getUserRepo();
 const token = getAccessToken(host);
 const githubOption = getGithubOption(host);
@@ -44,7 +47,7 @@ else if (command === 'create') {
   });
 }
 else if (command === 'show') {
-  let [number] = option._;
+  let [, number] = argv._;
 
   if (number) {
     setStatusMessage(`requesting #${number} issue and comment`);
@@ -67,7 +70,7 @@ else if (command === 'show') {
   }
 }
 else if (command === 'comment') {
-  let [number] = option._;
+  let [, number] = argv._;
 
   if (!number) {
     setErrorMessage('$ gic comment [issue_number]');
@@ -86,7 +89,7 @@ else if (command === 'comment') {
   }, true);
 }
 else if (command === 'close') {
-  let [number] = option._;
+  let [, number] = argv._;
   const closeIssue = () => {
     github.issues.edit({user, repo, number, state: 'closed'}, (err, res) => {
       if (err) {
@@ -117,16 +120,25 @@ else if (command === 'close') {
 }
 
 function setStatusMessage (msg) {
+  if (noprogress) {
+    return;
+  }
   logUpdate(`[${chalk.green('gic')}]`, msg);
 }
 
 function setErrorMessage (msg) {
-  setStatusMessage('error');
+  if (noprogress) {
+    return;
+  }
+  clearStatus();
   logUpdate.stderr(`[${chalk.red('gic')}]`, msg);
   logUpdate.stderr.done();
 }
 
 function clearStatus () {
+  if (noprogress) {
+    return;
+  }
   setStatusMessage('done');
   logUpdate.clear();
   logUpdate.done();
@@ -206,7 +218,7 @@ function getIssueMeesage (callback, isBody) {
 }
 
 function showIssues (issues) {
-  console.log(chalk.yellow(`${user}/${repo} has ${issues.length} issues`));
+  !noprogress && console.log(chalk.yellow(`${user}/${repo} has ${issues.length} issues`));
 
   issues.sort(compareIssue).forEach(issue => {
     let {number, title/*, user, assignee, comments*/, pull_request} = issue;

@@ -1,3 +1,5 @@
+- [#55](https://github.com/bonegollira/gic/pull/55) add `--noprogress` option.
+
 ## 0.4.0
 
 - [#50](https://github.com/bonegollira/gic/pull/50) add close command.

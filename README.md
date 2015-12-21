@@ -79,12 +79,19 @@ Close issue.
 $ gic close 1
 ```
 
+# Option
+
+```
+  --noprogress dont display progress log.
+```
+
 
 # Use with peco.
 
 ```
 function peco-gic () {
-  local selected_issue_number=$(gic list | peco | sed -e 's/^  #\([0-9]*\).*$/\1/g')
+  echo "\ngic list --noprogress"
+  local selected_issue_number=$(gic list --noprogress | peco | sed -e 's/^  #\([0-9]*\).*$/\1/g')
   if [ -n "$selected_issue_number" ]; then
     BUFFER="gic show ${selected_issue_number}"
     zle accept-line

@@ -1,3 +1,5 @@
+## 0.5.0
+
 - [#58](https://github.com/bonegollira/gic/pull/58) show issue information.
 - [#57](https://github.com/bonegollira/gic/pull/57) refactering.
 - [#55](https://github.com/bonegollira/gic/pull/55) add `--noprogress` option.

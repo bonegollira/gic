@@ -1,3 +1,5 @@
+- [#62](https://github.com/bonegollira/gic/pull/62) trim view.
+
 ## 0.5.0
 
 - [#58](https://github.com/bonegollira/gic/pull/58) show issue information.

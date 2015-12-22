@@ -235,14 +235,14 @@ function showIssue (issue) {
   milestone && console.log(chalk.underline(`milestone: ${milestone.title}`));
   assignee && console.log(chalk.underline(`assignee: @${assignee.login}`));
   console.log(chalk.yellow.bold(`# ${title}`));
-  console.log(`${body}`);
+  body ? console.log(`${body}`) : console.log(chalk.gray.dim('No description provided.'));
 }
 
 function showComments (number, comments) {
   comments.forEach(comment => {
     let {body, user} = comment;
 
-    console.log(' ', chalk.blue(`> @${user.login}`));
+    console.log('\n ', chalk.blue(`> @${user.login}`));
     console.log(' ', `${body.replace(/\n/g, '\n  ')}`);
   });
 }

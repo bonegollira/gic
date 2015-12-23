@@ -1,3 +1,5 @@
+### 0.5.1
+
 - [#62](https://github.com/bonegollira/gic/pull/62) trim view.
 
 ## 0.5.0

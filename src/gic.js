@@ -52,7 +52,7 @@ else {
       .then(([issue, comments]) => {
         clearStatus();
         showIssue(issue);
-        showComments(number, comments);
+        showComments(comments);
       })
       .catch(error);
   }
@@ -77,31 +77,31 @@ else {
   }
 }
 
-function repoIssuesPromise () {
+export function repoIssuesPromise () {
   return createGithubIssuesPromise('repoIssues');
 }
 
-function createPromise (title, body) {
+export function createPromise (title, body) {
   return createGithubIssuesPromise('create', {title, body});
 }
 
-function getRepoIssuePromise (number) {
+export function getRepoIssuePromise (number) {
   return createGithubIssuesPromise('getRepoIssue', {number});
 }
 
-function getCommentsPromise (number) {
+export function getCommentsPromise (number) {
   return createGithubIssuesPromise('getComments', {number});
 }
 
-function createCommentPromise (number, body) {
+export function createCommentPromise (number, body) {
   return createGithubIssuesPromise('createComment', {number, body});
 }
 
-function closePromise (number) {
+export function closePromise (number) {
   return createGithubIssuesPromise('edit', {number, state: 'closed'});
 }
 
-function createGithubIssuesPromise (api, option = {}) {
+export function createGithubIssuesPromise (api, option = {}) {
   return new Promise((resolve, reject) => {
     github.issues[api]({user, repo, ...option}, (err, res) => {
       err ? reject(err) : resolve(res);
@@ -109,16 +109,16 @@ function createGithubIssuesPromise (api, option = {}) {
   });
 }
 
-function status (message) {
+export function status (message) {
   !noprogress && logUpdate(`[${chalk.green('gic')}]`, message);
 }
 
-function clearStatus () {
+export function clearStatus () {
   logUpdate.clear();
   logUpdate.done();
 }
 
-function error (...messages) {
+export function error (...messages) {
   clearStatus();
   messages.forEach(message => {
     console.error(chalk.red(message));
@@ -126,7 +126,7 @@ function error (...messages) {
   process.exit(0);
 }
 
-function getUserRepo () {
+export function getUserRepo () {
   status('getting user/repo');
   let origin = getOriginUrl();
   let {hostname, pathname} = url.parse(origin);
@@ -140,17 +140,17 @@ function getUserRepo () {
   return {host: hostname, user, repo};
 }
 
-function getOriginUrl () {
+export function getOriginUrl () {
   return getLocalOriginUrl() || getRemoteOriginUrl();
 }
 
 // $ git config --get remote.origin.url
-function getLocalOriginUrl () {
+export function getLocalOriginUrl () {
   return spawnSync('git', ['config', '--get', 'remote.origin.url']).stdout.toString();
 }
 
 // $ git remote show origin
-function getRemoteOriginUrl () {
+export function getRemoteOriginUrl () {
   let remoteInformation = spawnSync('git', ['remote', 'show', 'origin']);
   return remoteInformation.stdout.toString().split('\n')
     .filter(line => /^Fetch URL/.test(line))
@@ -160,7 +160,7 @@ function getRemoteOriginUrl () {
 
 // $ git config --get gic.github.com.token
 // $ git config --get gic.github.enterprise.token
-function getAccessToken (host = 'github.com') {
+export function getAccessToken (host = 'github.com') {
   status('getting access token');
   const token = spawnSync('git', ['config', '--get', `gic.${host}.token`]).stdout.toString();
 
@@ -174,7 +174,7 @@ function getAccessToken (host = 'github.com') {
   return token;
 }
 
-function getGithubOption (host) {
+export function getGithubOption (host) {
   const githubOption = {
     version: '3.0.0',
     protocol: 'https',
@@ -187,7 +187,7 @@ function getGithubOption (host) {
   return githubOption;
 }
 
-function getIssueMessagePromise (isBody) {
+export function getIssueMessagePromise (isBody) {
   let filename = `.${randomstring.generate()}.gic`;
   fs.writeFileSync(filename, '', 'utf-8');
 
@@ -202,7 +202,7 @@ function getIssueMessagePromise (isBody) {
   });
 }
 
-function showIssues (issues) {
+export function showIssues (issues) {
   console.log(chalk.yellow(`${user}/${repo} has ${issues.length} issues`));
 
   issues.sort(compareIssue).forEach(issue => {
@@ -218,7 +218,7 @@ function showIssues (issues) {
   });
 }
 
-function compareIssue (aIssue, bIssue) {
+export function compareIssue (aIssue, bIssue) {
   if (aIssue.number > bIssue.number) {
     return 1;
   }
@@ -228,7 +228,7 @@ function compareIssue (aIssue, bIssue) {
   return 0;
 }
 
-function showIssue (issue) {
+export function showIssue (issue) {
   let {title, body, labels, milestone, assignee} = issue;
 
   labels.length && console.log(chalk.underline(`labels: ${labels.map(label => label.name).join(', ')}`));
@@ -238,7 +238,7 @@ function showIssue (issue) {
   body ? console.log(`${body}`) : console.log(chalk.gray.dim('No description provided.'));
 }
 
-function showComments (number, comments) {
+export function showComments (comments) {
   comments.forEach(comment => {
     let {body, user} = comment;
 

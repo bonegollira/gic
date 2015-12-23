@@ -104,7 +104,7 @@ bindkey "^N" peco-gic
 
 # ScreenShot
 
-![ScreenShot](images/screenshot.png)
+![ScreenShot](screenshot.png)
 
 # License
 
